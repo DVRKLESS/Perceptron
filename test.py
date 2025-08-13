@@ -22,12 +22,13 @@ if __name__ == "__main__":
 		k = ceil(uniform(-10, 10))
 		c = ceil(uniform(-20, 20))
 		ep = ceil(uniform(50, 300))
+		tempo = (uniform(0.01, 100))
 		data = generate_data(func=lambda x: k * x + c, n_points=1000, x_range=(-500, 500), y_range=(-100, 100))
 		x = [[a, b] for a, b, _ in data]
 		y = [label for _, _, label in data]
 
 		p = Perceptron(input_size=2, learning_rate=0.01)
-		p.train(x, y, epochs=50, dump_name=f"{percept:02},{k},{c}", save_mode="on")
+		p.train(x, y, epochs=50, dump_name=f"{percept:02},{k},{c},{ep},{tempo:05}", save_mode="on")
 		git_commit_and_push()
 
 
