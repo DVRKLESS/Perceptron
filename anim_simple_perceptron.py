@@ -48,10 +48,8 @@ class Perceptron:
 				for i in range(len(self.weights)):
 					self.weights[i] += self.lr * error * inputs[i]
 				self.bias += self.lr * error
-
-			if save_frames and (epoch + 1) % frame_interval == 0:
-				save_path = os.path.join(frames_dir, f"epoch_{epoch+1:03}.png")
-				self.plot_decision_boundary(x, y, epoch + 1, save_path=save_path)
+			save_path = os.path.join(frames_dir, f"epoch_{epoch+1:03}.png")
+			self.plot_decision_boundary(x, y, epoch + 1, save_path=save_path)
 
 		if save_mode == "on":
 			model_path = "dumps\\" + dump_name
