@@ -91,6 +91,7 @@ class Perceptron:
 			plt.savefig(save_path)
 		else:
 			plt.pause(0.001)
+			
 	def predict(self, inputs):
 		total = sum(w * xi for w, xi in zip(self.weights, inputs)) + self.bias
 		return 1 if total >= 0 else 0
