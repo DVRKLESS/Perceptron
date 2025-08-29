@@ -1,20 +1,27 @@
-from random import uniform, shuffle
+import random
 import matplotlib.pyplot as plt
 import os
 import pickle
+import numpy as np
+
+rng_data = random.Random()
+
 
 # =============== GENERATOR ===============
-def generate_data(func=None, n_points=500, x_range=(0, 100), y_range=(-10, 10)):
+def generate_data(func, n_points=500, x_range=(0, 100), y_range=(-10, 10), gap = 5):
 	data = []
 	for _ in range(n_points):
-		a = uniform(*x_range)
-		b = uniform(*y_range)
-		if func is None:
-			label = 0 if a < (x_range[0] + x_range[1]) / 2 else 1
+		a = rng_data.uniform(*x_range)
+		b = rng_data.uniform(*y_range)
+		f = func(a)
+		if b < f:
+			label = 0
+		elif b > f + gap:
+			label = 1
 		else:
-			label = 0 if b < func(a) else 1
+			continue
 		data.append((a, b, label))
-	shuffle(data)
+	random.shuffle(data)
 	return data
 
 
@@ -23,8 +30,10 @@ import pickle
 
 class Perceptron:
 	def __init__(self, input_size, learning_rate=0.1):
-		self.weights = [uniform(-1, 1) for _ in range(input_size)]
-		self.bias = uniform(-1, 1)
+		self.weights = np.random.uniform(-1, 1, size=input_size).tolist()
+		self.bias = float(np.random.uniform(-1, 1))
+		print(self.weights)
+		print(self.bias)
 		self.lr = learning_rate
 		self.train_x = None
 		self.train_y = None
@@ -34,6 +43,15 @@ class Perceptron:
 		frames_dir = os.path.join("frames", dump_name)
 		self.train_x = x
 		self.train_y = y
+		for (xi, yi), label in zip(x, y):
+			plt.scatter(xi, yi, color='red' if label == 0 else 'blue', marker='o' if label == 0 else 'x')
+		x_vals = [min(pt[0] for pt in x) - 10, max(pt[0] for pt in x) + 10]
+		y_vals = [(-(self.weights[0] / self.weights[1]) * xv - (self.bias / self.weights[1])) for xv in x_vals]
+		# y_vals = [-(self.weights[0] * xv + self.bias) / self.weights[1] for xv in x_vals]
+		plt.xlim(min(pt[0] for pt in x) - 20, max(pt[0] for pt in x) + 20)
+		plt.ylim(min(pt[1] for pt in x) - 20, max(pt[1] for pt in x) + 20)
+		plt.plot(x_vals, y_vals, 'k-')
+		plt.show()
 
 		if save_frames and not os.path.exists(frames_dir):
 			os.makedirs(frames_dir)
@@ -77,7 +95,9 @@ class Perceptron:
 	
 		if self.weights[1] != 0:
 			x_vals = [min(pt[0] for pt in x) - 10, max(pt[0] for pt in x) + 10]
-			y_vals = [-(self.weights[0] * xv + self.bias) / self.weights[1] for xv in x_vals]
+			y_vals = [(-(self.weights[0] / self.weights[1]) * xv - (self.bias / self.weights[1])) for xv in x_vals]
+			# x_vals = [min(pt[0] for pt in x) - 10, max(pt[0] for pt in x) + 10]
+			# y_vals = [-(self.weights[0] * xv + self.bias) / self.weights[1] for xv in x_vals]
 	
 			eq_text = f"y = {-self.weights[0]/self.weights[1]:.2f}x + {-self.bias/self.weights[1]:.2f}"
 			plt.plot(x_vals, y_vals, 'k-', label=eq_text)
@@ -91,6 +111,7 @@ class Perceptron:
 			plt.savefig(save_path)
 		else:
 			plt.pause(0.001)
+			
 	def predict(self, inputs):
 		total = sum(w * xi for w, xi in zip(self.weights, inputs)) + self.bias
 		return 1 if total >= 0 else 0
